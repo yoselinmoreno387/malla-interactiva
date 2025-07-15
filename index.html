@@ -1,1 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Malla Interactiva - Administración Pública</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f7f9fc; padding: 2rem; }
+    h1,h2 { color: #2c3e50; }
+    .semestre { margin-bottom: 2rem; }
+    .curso {
+      background: #ecf0f1;
+      border: 1px solid #bdc3c7;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: 0.3s;
+    }
+    .curso.aprobado { background: #2ecc71; color: white; }
+    .curso.bloqueado { background: #e74c3c; color: white; }
+    .curso button {
+      padding: 5px 10px;
+      border: none;
+      background: #3498db;
+      color: white;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .curso button:disabled { background: #7f8c8d; cursor: not-allowed; }
+  </style>
+</head>
+<body>
 
+<h1>Malla Interactiva – Administración Pública</h1>
+<div id="contenedor"></div>
+
+<script>
+  const cursos = {
+    "Semestre 1": [
+      {id:"mat1", nombre:"Matemáticas I", cred:3},
+      {id:"const", nombre:"Constitución Política", cred:3},
+      {id:"doctrinas", nombre:"Doctrinas Políticas y Teorías", cred:3},
+      {id:"eco_fund", nombre:"Fundamentos de Economía y Comercio", cred:3},
+      {id:"leng_fund", nombre:"Fund. Lenguaje y Comunicación", cred:2},
+      {id:"ing1", nombre:"Inglés I", cred:2},
+      {id:"salud", nombre:"Electiva Estilos de Vida Saludable", cred:3}
+    ],
+    "Semestre 2": [
+      {id:"mat2", nombre:"Matemáticas II", cred:3, prereq:["mat1"]},
+      {id:"admin_fund", nombre:"Fundamentos de Administración", cred:3},
+      {id:"hist_col", nombre:"Historia de Colombia", cred:3, prereq:["doctrinas"]},
+      {id:"eco1", nombre:"Economía I", cred:3, prereq:["eco_fund"]},
+      {id:"ing2", nombre:"Inglés II", cred:2, prereq:["ing1"]},
+      {id:"art_hum", nombre:"Electiva Artístico y Humanista", cred:2},
+      {id:"form_soc1", nombre:"Electiva Formación Social y Ciudadana I", cred:3}
+    ],
+    "Semestre 3": [
+      {id:"est1", nombre:"Estadística I", cred:3},
+      {id:"pens_pub1", nombre:"Pensamiento Admin. Público I", cred:3, prereq:["admin_fund"]},
+      {id:"conta_fund", nombre:"Fund. Contabilidad Financiera", cred:3},
+      {id:"intro_der", nombre:"Introducción al Derecho", cred:3},
+      {id:"eco2", nombre:"Economía II", cred:3, prereq:["eco1"]},
+      {id:"ing3", nombre:"Inglés III", cred:2, prereq:["ing2"]}
+    ],
+    "Semestre 4": [
+      {id:"est2", nombre:"Estadística II", cred:3, prereq:["est1"]},
+      {id:"mat_fin", nombre:"Matemática Financiera", cred:3, prereq:["conta_fund"]},
+      {id:"der_adm", nombre:"Derecho Administrativo", cred:3, prereq:["intro_der"]},
+      {id:"pens_pub2", nombre:"Pensamiento Admin. Público II", cred:3, prereq:["pens_pub1"]},
+      {id:"form_soc2", nombre:"Electiva Formación Social y Ciudadana II", cred:3},
+      {id:"ing4", nombre:"Inglés IV", cred:2, prereq:["ing3"]}
+    ],
+    "Semestre 5": [
+      {id:"cont_est", nombre:"Contratación Estatal", cred:3, prereq:["der_adm"]},
+      {id:"mark_soc", nombre:"Marketing Social y Político", cred:3, prereq:["pens_pub2"]},
+      {id:"hacienda", nombre:"Hacienda y Finanzas Públicas", cred:3, prereq:["mat_fin"]},
+      {id:"socio_org", nombre:"Sociología de las Organizaciones", cred:3, prereq:["pens_pub2"]},
+      {id:"pol_econ", nombre:"Política Económica Nacional e Internacional", cred:3, prereq:["eco2"]},
+      {id:"resp_soc", nombre:"Responsabilidad Social y Gestión Humana", cred:3, prereq:["pens_pub2"]},
+      {id:"elect_prof1", nombre:"Electiva Profesional I", cred:3}
+    ],
+    "Semestre 6": [
+      {id:"form_pol", nombre:"Formulación e Implementación de Políticas Públicas", cred:3, prereq:["socio_org"]},
+      {id:"sist_cal", nombre:"Sistemas de Gestión de Calidad", cred:3, prereq:["resp_soc"]},
+      {id:"plan_pres", nombre:"Planeación Estatal y Presupuesto Público", cred:3, prereq:["hacienda"]},
+      {id:"der_int", nombre:"Derecho Internacional Público", cred:3, prereq:["pol_econ"]},
+      {id:"prosp", nombre:"Prospectiva Territorial y Estratégica", cred:3, prereq:["hacienda"]},
+      {id:"taller_redac", nombre:"Taller Redacción Académica", cred:2, prereq:["leng_fund"]},
+      {id:"elect_prof2", nombre:"Electiva Profesional II", cred:3}
+    ],
+    "Semestre 7": [
+      {id:"eval_pol", nombre:"Evaluación de Políticas Públicas", cred:3, prereq:["form_pol"]},
+      {id:"innov_soc", nombre:"Innovación Social y Buen Gobierno", cred:3, prereq:["sist_cal"]},
+      {id:"cont_pub", nombre:"Contabilidad Pública", cred:3, prereq:["plan_pres"]},
+      {id:"comp_cient", nombre:"Componente Científico‑Tecnológico", cred:3},
+      {id:"met_inv", nombre:"Metodología de la Investigación", cred:3, prereq:["taller_redac"]},
+      {id:"dis_prog", nombre:"Diseño y Evaluación de Proyectos Sociales", cred:3, prereq:["prosp"]},
+      {id:"elect_prof3", nombre:"Electiva Profesional III", cred:3}
+    ],
+    "Semestre 8": [
+      {id:"pres_pub", nombre:"Presupuesto Público y Control Fiscal", cred:3, prereq:["cont_pub"]},
+      {id:"trab_grado", nombre:"Trabajo de Grado", cred:4, prereq:["met_inv"]},
+      {id:"elect_prof4", nombre:"Electiva Profesional IV", cred:3}
+    ]
+  };
+
+  const completados = new Set();
+
+  function crearMalla() {
+    const cont = document.getElementById('contenedor');
+    for (const [sem, rams] of Object.entries(cursos)) {
+      const divS = document.createElement('div'); divS.className='semestre';
+      const h2 = document.createElement('h2'); h2.textContent = sem;
+      divS.appendChild(h2);
+      rams.forEach(c => {
+        const d = document.createElement('div');
+        d.id = c.id; d.className = 'curso' + (c.prereq ? ' bloqueado':'');
+        const span = document.createElement('span');
+        span.textContent = `${c.nombre} (${c.cred} créditos)`;
+        const btn = document.createElement('button');
+        btn.textContent = 'Aprobar';
+        btn.disabled = !!c.prereq;
+        btn.onclick = () => aprobar(c);
+        d.appendChild(span); d.appendChild(btn);
+        divS.appendChild(d);
+      });
+      cont.appendChild(divS);
+    }
+  }
+
+  function aprobar(c) {
+    completados.add(c.id);
+    const d = document.getElementById(c.id);
+    d.classList.remove('bloqueado'); d.classList.add('aprobado');
+    d.querySelector('button').disabled = true;
+
+    Object.values(cursos).flat().forEach(r => {
+      if (r.prereq && !completados.has(r.id)) {
+        const ok = r.prereq.every(pr => completados.has(pr));
+        if (ok) {
+          const el = document.getElementById(r.id);
+          el.classList.remove('bloqueado');
+          el.querySelector('button').disabled = false;
+        }
+      }
+    });
+  }
+
+  crearMalla();
+</script>
+
+</body>
+</html>
