@@ -1,1 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Malla Interactiva - Administración Pública</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f7f9fc;
+      margin: 0;
+      padding: 2rem;
+    }
+    h1, h2 {
+      color: #2c3e50;
+    }
+    .semestre {
+      margin-bottom: 2rem;
+    }
+    .curso {
+      background-color: #ecf0f1;
+      border: 1px solid #bdc3c7;
+      padding: 10px;
+      margin: 5px 0;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: 0.3s;
+    }
+    .curso.aprobado {
+      background-color: #2ecc71;
+      color: white;
+    }
+    .curso.bloqueado {
+      background-color: #e74c3c;
+      color: white;
+    }
+    .curso button {
+      padding: 5px 10px;
+      border: none;
+      background-color: #3498db;
+      color: white;
+      border-radius: 3px;
+      cursor: pointer;
+    }
+    .curso button:disabled {
+      background-color: #7f8c8d;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+  <h1>Malla Interactiva - Administración Pública</h1>
+  <div id="contenedor"></div>
 
+  <script>
+    const cursos = {
+      "Semestre 1": [
+        { id: "mat1", nombre: "Matemáticas I", creditos: 3 },
+        { id: "const", nombre: "Constitución Política de Colombia", creditos: 3 },
+        { id: "doctrinas", nombre: "Doctrinas Políticas y Teorías del Estado", creditos: 3 },
+        { id: "eco_fund", nombre: "Fundamentos de Economía y Comercio", creditos: 3 },
+        { id: "leng_fund", nombre: "Fundamentos del Lenguaje y la Comunicación en Español", creditos: 2 },
+        { id: "ing1", nombre: "Inglés I", creditos: 2 },
+        { id: "salud", nombre: "Electiva de Estilos de Vida Saludable", creditos: 3 }
+      ],
+      "Semestre 2": [
+        { id: "mat2", nombre: "Matemáticas II", creditos: 3, prerequisitos: ["mat1"] },
+        { id: "admin_fund", nombre: "Fundamentos de Administración", creditos: 3 },
+        { id: "hist_col", nombre: "Historia de Colombia", creditos: 3, prerequisitos: ["doctrinas"] },
+        { id: "eco1", nombre: "Economía I", creditos: 3, prerequisitos: ["eco_fund"] },
+        { id: "ing2", nombre: "Inglés II", creditos: 2, prerequisitos: ["ing1"] },
+        { id: "art_hum", nombre: "Electiva Artístico y Humanista", creditos: 2 },
+        { id: "form_soc1", nombre: "Electiva Formación Social y Ciudadana I", creditos: 3 }
+      ]
+      // Agrega aquí el resto de los semestres siguiendo el mismo patrón
+    };
+
+    const completados = new Set();
+
+    function crearMalla() {
+      const contenedor = document.getElementById('contenedor');
+      for (const [semestre, ramos] of Object.entries(cursos)) {
+        const divSemestre = document.createElement('div');
+        divSemestre.className = 'semestre';
+        const h2 = document.createElement('h2');
+        h2.textContent = semestre;
+        divSemestre.appendChild(h2);
+
+        ramos.forEach(curso => {
+          const divCurso = document.createElement('div');
+          divCurso.className = 'curso';
+          divCurso.id = curso.id;
+          if (curso.prerequisitos) divCurso.classList.add('bloqueado');
+          const nombre = document.createElement('span');
+          nombre.textContent = `${curso.nombre} (${curso.creditos} créditos)`;
+          const boton = document.createElement('button');
+          boton.textContent = 'Aprobar';
+          boton.disabled = !!curso.prerequisitos;
+          boton.onclick = () => aprobarCurso(curso);
+
+          divCurso.appendChild(nombre);
+          divCurso.appendChild(boton);
+          divSemestre.appendChild(divCurso);
+        });
+
+        contenedor.appendChild(divSemestre);
+      }
+    }
+
+    function aprobarCurso(curso) {
+      completados.add(curso.id);
+      document.getElementById(curso.id).classList.remove('bloqueado');
+      document.getElementById(curso.id).classList.add('aprobado');
+      document.getElementById(curso.id).querySelector('button').disabled = true;
+
+      // Buscar todos los cursos y habilitar si cumple prerrequisitos
+      for (const [semestre, ramos] of Object.entries(cursos)) {
+        ramos.forEach(r => {
+          if (r.prerequisitos && !document.getElementById(r.id).classList.contains('aprobado')) {
+            const puedeDesbloquear = r.prerequisitos.every(pr => completados.has(pr));
+            if (puedeDesbloquear) {
+              const div = document.getElementById(r.id);
+              div.classList.remove('bloqueado');
+              div.querySelector('button').disabled = false;
+            }
+          }
+        });
+      }
+    }
+
+    crearMalla();
+  </script>
+</body>
+</html>
